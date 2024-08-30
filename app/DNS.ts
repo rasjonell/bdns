@@ -3,14 +3,15 @@ export const DNS = {
 };
 
 function generateResponse() {
-  const buffer = Buffer.alloc(12);
+  const headers = writeHeaders();
+  const question = writeQuestion();
 
-  writeHeaders(buffer);
-
-  return buffer;
+  return Buffer.concat([headers, question]);
 }
 
-function writeHeaders(buffer: Buffer) {
+function writeHeaders() {
+  const buffer = Buffer.alloc(12);
+
   // Packet Identifier (ID)
   buffer.writeUInt16BE(1234, 0);
 
@@ -53,7 +54,7 @@ function writeHeaders(buffer: Buffer) {
   buffer[3] = combinedSection2;
 
   // Question Count (QDCOUNT)
-  buffer.writeUint16BE(0, 4);
+  buffer.writeUint16BE(1, 4);
 
   // Answer Record Count (ANCOUNT)
   buffer.writeUint16BE(0, 6);
@@ -63,4 +64,21 @@ function writeHeaders(buffer: Buffer) {
 
   // Additional Record Count (ARCOUNT)
   buffer.writeUint16BE(0, 10);
+
+  return buffer;
+}
+
+function writeQuestion() {
+  const typeAndClass = Buffer.alloc(4);
+  typeAndClass.writeInt16BE(1);
+  typeAndClass.writeInt16BE(1, 2);
+
+  const tld = 'io';
+  const domain = 'codecrafters';
+
+  const name = Buffer.from(
+    `${String.fromCharCode(domain.length)}${domain}${String.fromCharCode(tld.length)}${tld}`,
+  );
+
+  return Buffer.concat([name, typeAndClass]);
 }
