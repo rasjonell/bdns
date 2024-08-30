@@ -32,13 +32,15 @@ const defaultDNSHeaderInput: DNSHeaderInput = {
   arcount: 0,
 };
 
-function encode(input?: Partial<DNSHeaderInput> = defaultDNSHeaderInput): Buffer {
+function encode(input?: Partial<DNSHeaderInput>): Buffer {
   const buffer = Buffer.alloc(12);
 
-  const { z, id, aa, tc, rd, ra, rcode, opcode, qdcount, ancount, nscount, arcount } = {
-    ...defaultDNSHeaderInput,
-    ...input,
-  };
+  const { z, id, aa, tc, rd, ra, rcode, opcode, qdcount, ancount, nscount, arcount } = input
+    ? {
+        ...defaultDNSHeaderInput,
+        ...input,
+      }
+    : defaultDNSHeaderInput;
 
   const firstCombinedByte =
     (id << 7) | // Shift 1st section to the most significant bit
