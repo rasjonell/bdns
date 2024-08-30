@@ -1,3 +1,5 @@
+import { numberToHexString } from '../utils/converters';
+
 export const DNSQuestion = {
   encode,
 };
@@ -8,7 +10,7 @@ export type DNSQuestionInput = {
   questionClass: number;
 };
 
-const defaultDNSQuestionInput = {
+export const defaultDNSQuestionInput = {
   type: 1,
   questionClass: 1,
   name: 'codecrafters.io',
@@ -26,7 +28,7 @@ function encode(input?: Partial<DNSQuestionInput>) {
   const encodedName =
     name
       .split('.')
-      .map((part) => `${String.fromCharCode(part.length)}${part}`)
+      .map((part) => `${numberToHexString(part.length)}${part}`)
       .join('') + '\0';
 
   return Buffer.concat([Buffer.from(encodedName, 'binary'), typeAndClassBuffer]);
