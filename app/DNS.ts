@@ -77,7 +77,8 @@ function writeQuestion() {
   const domain = 'codecrafters';
 
   const name = Buffer.from(
-    `${String.fromCharCode(domain.length)}${domain}${String.fromCharCode(tld.length)}${tld}`,
+    `${String.fromCharCode(domain.length)}${domain}${String.fromCharCode(tld.length)}${tld}\0`,
+    'binary',
   );
 
   return Buffer.concat([name, typeAndClass]);
