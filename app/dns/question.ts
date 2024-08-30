@@ -27,7 +27,7 @@ function encode(input?: Partial<DNSQuestionInput>) {
     name
       .split('.')
       .map((part) => `${String.fromCharCode(part.length)}${part}`)
-      .join('') + '/0';
+      .join('') + '\0';
 
   return Buffer.concat([Buffer.from(encodedName, 'binary'), typeAndClassBuffer]);
 }

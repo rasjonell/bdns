@@ -9,6 +9,7 @@ export type DNSHeaderInput = {
   tc: number;
   rd: number;
   ra: number;
+  qr: number;
   rcode: number;
   opcode: number;
   qdcount: number;
@@ -19,11 +20,12 @@ export type DNSHeaderInput = {
 
 const defaultDNSHeaderInput: DNSHeaderInput = {
   z: 0,
-  id: 1234,
   aa: 0,
   tc: 0,
   rd: 0,
   ra: 0,
+  qr: 1,
+  id: 1234,
   rcode: 0,
   opcode: 0,
   qdcount: 0,
@@ -35,7 +37,7 @@ const defaultDNSHeaderInput: DNSHeaderInput = {
 function encode(input?: Partial<DNSHeaderInput>): Buffer {
   const buffer = Buffer.alloc(12);
 
-  const { z, id, aa, tc, rd, ra, rcode, opcode, qdcount, ancount, nscount, arcount } = input
+  const { z, qr, aa, tc, id, rd, ra, rcode, opcode, qdcount, ancount, nscount, arcount } = input
     ? {
         ...defaultDNSHeaderInput,
         ...input,
@@ -43,7 +45,7 @@ function encode(input?: Partial<DNSHeaderInput>): Buffer {
     : defaultDNSHeaderInput;
 
   const firstCombinedByte =
-    (id << 7) | // Shift 1st section to the most significant bit
+    (qr << 7) | // Shift 1st section to the most significant bit
     (opcode << 3) | // Shift 2nd section to the 4 bits after the 1st section
     (aa << 2) | // Shift 3rd section to the next bit
     (tc << 1) | // Shift 4th section to the next bit
