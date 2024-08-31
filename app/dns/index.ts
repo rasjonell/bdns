@@ -6,10 +6,22 @@ export const DNS = {
   generateResponse,
 };
 
-function generateResponse() {
-  const question = DNSQuestion.encode();
-  const answer = DNSAnswer.encode(question);
-  const header = DNSHeader.encode({ qdcount: 1, ancount: 1 });
+function generateResponse(data: Buffer) {
+  const parsedHeaders = DNSHeader.parse(data);
 
-  return Buffer.concat([header, question, answer]);
+  const rQuestion = DNSQuestion.encode();
+  const rAnswer = DNSAnswer.encode(rQuestion);
+
+  // Hardcoding some values for this stage
+  const rHeader = DNSHeader.encode({
+    ...parsedHeaders,
+    qr: 1,
+    aa: 0,
+    z: 0,
+    tc: 0,
+    ra: 0,
+    rcode: parsedHeaders.opcode === 0 ? 0 : 4,
+  });
+
+  return Buffer.concat([rHeader, rQuestion, rAnswer]);
 }

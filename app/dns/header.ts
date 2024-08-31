@@ -1,4 +1,5 @@
 export const DNSHeader = {
+  parse,
   encode,
 };
 
@@ -37,7 +38,7 @@ const defaultDNSHeaderInput: DNSHeaderInput = {
 function encode(input?: Partial<DNSHeaderInput>): Buffer {
   const buffer = Buffer.alloc(12);
 
-  const { z, qr, aa, tc, id, rd, ra, rcode, opcode, qdcount, ancount, nscount, arcount } = input
+  const { z, qr, aa, tc, id, rd, ra, rcode, opcode, qdcount, nscount, arcount } = input
     ? {
         ...defaultDNSHeaderInput,
         ...input,
@@ -61,7 +62,8 @@ function encode(input?: Partial<DNSHeaderInput>): Buffer {
   buffer.writeUint16BE(qdcount, 4);
 
   // Answer Record Count (ANCOUNT)
-  buffer.writeUint16BE(ancount, 6);
+  // Same as Question Count (QDCOUNT)
+  buffer.writeUint16BE(qdcount, 6);
 
   // Authority Record Count (NSCOUNT)
   buffer.writeUint16BE(nscount, 8);
@@ -70,4 +72,41 @@ function encode(input?: Partial<DNSHeaderInput>): Buffer {
   buffer.writeUint16BE(arcount, 10);
 
   return buffer;
+}
+
+function parse(buffer: Buffer): DNSHeaderInput {
+  const id = buffer.readUint16BE();
+  const qdcount = buffer.readUint16BE(4);
+  const ancount = buffer.readUint16BE(6);
+  const nscount = buffer.readUint16BE(8);
+  const arcount = buffer.readUint16BE(10);
+
+  const firstCombinedSection = buffer[2];
+
+  const rd = firstCombinedSection & 0x01;
+  const qr = (firstCombinedSection >> 7) & 0x01;
+  const aa = (firstCombinedSection >> 2) & 0x01;
+  const tc = (firstCombinedSection >> 1) & 0x01;
+  const opcode = (firstCombinedSection >> 3) & 0x0f;
+
+  const secondCombinedSection = buffer[3];
+  const rcode = secondCombinedSection & 0x03;
+  const z = (secondCombinedSection >> 2) & 0x1f;
+  const ra = (secondCombinedSection >> 7) & 0x01;
+
+  return {
+    z,
+    id,
+    aa,
+    tc,
+    rd,
+    ra,
+    qr,
+    rcode,
+    opcode,
+    qdcount,
+    ancount,
+    nscount,
+    arcount,
+  };
 }

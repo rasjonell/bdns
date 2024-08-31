@@ -8,7 +8,7 @@ udpSocket.on('message', (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
   try {
     console.log(`Received data from ${remoteAddr.address}:${remoteAddr.port}`, data.toString());
 
-    const response = DNS.generateResponse();
+    const response = DNS.generateResponse(data);
 
     udpSocket.send(response, remoteAddr.port, remoteAddr.address);
   } catch (e) {
