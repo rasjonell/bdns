@@ -1,4 +1,5 @@
 import * as dgram from 'dgram';
+
 import { DNS } from './dns';
 
 const udpSocket: dgram.Socket = dgram.createSocket('udp4');

@@ -7,12 +7,8 @@ export const DNS = {
 };
 
 function generateResponse(data: Buffer) {
-  const parsedHeaders = DNSHeader.parse(data);
-
-  const rQuestion = DNSQuestion.encode();
-  const rAnswer = DNSAnswer.encode(rQuestion);
-
   // Hardcoding some values for this stage
+  const parsedHeaders = DNSHeader.parse(data);
   const rHeader = DNSHeader.encode({
     ...parsedHeaders,
     qr: 1,
@@ -22,6 +18,11 @@ function generateResponse(data: Buffer) {
     ra: 0,
     rcode: parsedHeaders.opcode === 0 ? 0 : 4,
   });
+
+  const parsedQuestion = DNSQuestion.parse(data);
+  const rQuestion = DNSQuestion.encode(parsedQuestion);
+
+  const rAnswer = DNSAnswer.encode(rQuestion);
 
   return Buffer.concat([rHeader, rQuestion, rAnswer]);
 }

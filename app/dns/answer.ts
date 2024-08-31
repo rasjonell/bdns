@@ -24,6 +24,7 @@ function encode(questionBuffer: Buffer) {
       .map((part) => numberToHexString(+part))
       .join(''),
   );
+
   answerBuffer.writeUInt32BE(rdata);
 
   return Buffer.concat([questionBuffer, answerBuffer]);

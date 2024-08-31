@@ -1,6 +1,7 @@
 import { numberToHexString } from '../utils/converters';
 
 export const DNSQuestion = {
+  parse,
   encode,
 };
 
@@ -32,4 +33,28 @@ function encode(input?: Partial<DNSQuestionInput>) {
       .join('') + '\0';
 
   return Buffer.concat([Buffer.from(encodedName, 'binary'), typeAndClassBuffer]);
+}
+
+function parse(buffer: Buffer): DNSQuestionInput {
+  const typeAndClassBuffer = buffer.subarray(-4);
+  const type = typeAndClassBuffer.readUInt16BE(0);
+  const questionClass = typeAndClassBuffer.readUInt16BE(2);
+
+  const encodedNameBuffer = buffer.subarray(12, -4);
+
+  let name = '';
+  let offset = 0;
+
+  while (offset < encodedNameBuffer.length) {
+    const length = encodedNameBuffer[offset];
+    if (length === 0) break; // Null byte indicates the end of the name
+    const part = encodedNameBuffer.subarray(offset + 1, offset + 1 + length).toString('binary');
+    name += part + '.';
+    offset += 1 + length;
+  }
+
+  // Remove the trailing dot from the name
+  name = name.slice(0, -1);
+
+  return { type, name, questionClass };
 }
